@@ -1,0 +1,131 @@
+# basic tidyr uses
+`gather()` `spread()` can break down or transpose the data
+the differnt between the two , 
+is we use gather when the variable(s) is in the same property,
+and use spread on a variable, which it's values are in the same property.
+
+`separate()`for split the var with multiple property into adequate vars.
+
+
+load in the files
+```{r}
+# getwd()
+library(dplyr)
+library(tidyr)
+library(readr)
+students <- read.table("./data/students.csv",sep = " ")
+students2 <- read.table("./data/students2.csv",sep = " ")
+students3 <- read.table("./data/students3.csv",sep = " ")
+students4 <- read.table("./data/students4.csv",sep = " ")
+sat <- read.table("./data/sat.csv",sep = " ")
+```
+
+# gather ()
+gather() make the 2 variable, male and female, which cotains the count, into sex and count.
+```{r}
+head(students)
+gather(students, sex, count, -grade)
+# a <- gather(students, sex, count, -grade)
+#spread(a, sex,count)
+```
+# gather() + separate()
+students2 is a datsets contains the counts of 2 classes by sex,
+what we want, is to separate the vars into class and sex with grade.
+```{r}
+head(students2)
+```
+
+first , we gather the datasets
+```{r}
+students2 %>%
+  gather(sex ,count ,-grade )%>%
+        head()
+```
+and then separate the column sex we've just made, into sex and class. 
+```{r}
+
+students2 %>%
+  gather(sex ,count ,-grade ) %>%
+  separate( col = sex, c("sex", "class")) %>%
+  head()
+```
+# gather() + spread() + mutate()
+the rows in students3 contains more than one information, 
+we have to clean it up.
+```{r}
+head(students3)
+```
+first, gather up the classes
+```{r}
+students3 %>%
+  gather(class, grade,-name,-test, na.rm = TRUE)%>%
+        head()
+```
+spread function
+```{r}
+students3 %>%
+  gather(class, grade, class1:class5, na.rm = TRUE) %>%
+  spread(test, grade)%>%
+        head()
+```
+add the col of  class by using `parse_number()`
+```{r}
+students3 %>%
+  gather(class, grade, class1:class5, na.rm = TRUE) %>%
+  spread(test, grade) %>%
+        mutate(class = parse_number(class))%>%
+  head
+```
+# break into 2 dataset by id
+students4 is a dataset alike students3, but with id.
+clening the data by using id as a key.
+```{r}
+head(students4)
+```
+       
+```{r}
+student_info <- students4 %>%
+  select(id, name, sex) %>%
+        unique()
+
+gradebook <- students4 %>%
+  select(id, class, midterm, final)
+
+head(student_info)
+head(gradebook)
+```
+
+# select() + gather() + separate() + group_by() + mutate()
+
+```{r}
+head(sat)
+```
+
+i want to know the differences between sex on sat subjects.
+so i first select the var i need, 
+which exclude the var contains total,
+then gather the subject and sex(old column name),
+into the new var named part_sex,
+go on using separate to separate the part_sex var.
+```{r}
+sat %>%
+  select(-contains("total")) %>%
+        gather(key = part_sex, value = count, -score_range) %>%
+        separate(col = part_sex,c("part", "sex"))%>%
+        head
+```
+
+the goal is to know the difference between sex on the subjects, 
+so we group up by sex and subjects (2*3)by using group_by function.
+use mutate to make a apply of sum in all groups.
+```{r}
+sat %>%
+  select(-contains("total")) %>%
+  gather(part_sex, count, -score_range) %>%
+  separate(part_sex, c("part", "sex")) %>%
+ group_by(part, sex)%>%
+  mutate(total = sum(count),
+         prop = count/total
+  ) %>% print
+```
+

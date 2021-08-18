@@ -1,0 +1,95 @@
+
+# Dplyr basic uses
+grammar of dply put the name of the data in the fisrt statement of the fun.
+`select` for column
+`filter` for row with cond like subset
+`arrange` for order
+`rename` rename
+`mutate` add new var with cond
+`summarize` new dataframe with the information u want
+pipline `%>%`
+
+```{r}
+library(dplyr)
+data(mtcars)
+names(mtcars)
+```
+
+
+
+# select()
+
+```{r}
+head(select(mtcars,mpg:hp))
+head(select(mtcars,-(mpg:hp)))
+i <- match("mpg", names(mtcars))
+i
+j <- match("cyl", names(mtcars))
+j
+head(mtcars[,-(i:j)])
+```
+
+
+# filter
+
+```{r}
+cyl8 <- filter(mtcars, cyl > 6)
+cyl8nhp <- filter(mtcars, cyl > 3 & hp>100)
+```
+
+# arrange
+
+```{r}
+mtcars <- arrange(mtcars, mpg)
+mtcars1 <- arrange(mtcars, desc(disp))
+head(mtcars,10)
+
+```
+
+# rename
+
+```{r}
+names(mtcars)
+mtcars <- rename(mtcars, miles_per_gallon = mpg, cylinders = cyl)
+names(mtcars)
+mtcars <- mutate(mtcars, dispdetrend = disp - mean(disp))
+mtcars$dispdetrend <- round(mtcars$dispdetrend,2)
+head(select(mtcars,disp, dispdetrend),10)
+quantile(mtcars$wt)
+mtcars <- mutate(mtcars, heavy = factor(1*(wt>3.6),labels = c("quite heavy", "normal")))
+mtcars <- mutate(mtcars, qsectemp = factor(1*(qsec<15), labels = c("fast", "normal")))
+heaviness <- group_by(mtcars,heavy)
+heaviness
+```
+
+
+
+
+# summarize
+
+```{r}
+summarize(heaviness, mpg = mean(miles_per_gallon), disp_max = max(disp), qsec_median = median(qsec))
+summarize(mtcars, mpg = mean(miles_per_gallon), disp_max = max(disp), qsec_median = median(qsec))
+#mtcars <- select(mtcars, -c(qsectemp))
+names(mtcars)
+head(select(mtcars, heavy, qsectemp),10)
+xt <- table(mtcars$heavy, mtcars$qsectemp)
+xt
+```
+
+
+
+
+# pipe line
+
+```{r}
+
+data("mtcars")
+names(mtcars)
+quantile(mtcars$hp)
+mtcars %>% mutate(horsepower = factor((hp > 180),labels = c("powerful", "normal"))) %>% group_by(horsepower) %>% summarize(mpg = mean(mpg), disp_max = max(disp), qsec_med = median(qsec))
+
+
+```
+
+
