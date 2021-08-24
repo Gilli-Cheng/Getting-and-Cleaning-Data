@@ -1,0 +1,87 @@
+```{r}
+#getwd()
+if(!file.exists("./data")){dir.create("./data")}
+cameradata <- read.csv("./data/Fixed_Speed_Cameras.csv")
+names(cameradata)
+```
+
+# strsplit tolower
+```{r}
+tolower(names(cameradata))
+splitname <- strsplit(names(cameradata),"\\..")
+splitname[[1]]<- splitname[[1]][2]
+names(cameradata)<- splitname
+```
+
+
+
+
+# sub gsub
+can be use in only one underscore,
+like vars.
+but if you have multiple underscore,
+u have to use`gsub()`
+```{r}
+under <- "no_more_underscore_!"
+sub("_","", under,)
+gsub("_","",under)
+```
+
+
+# grep for search and subset!
+# grepl for T F 
+```{r}
+str(cameradata)
+grep("Edmonson", cameradata$street)
+table(grepl("Edmonson", cameradata$street))
+grep("Park", cameradata$street, value = TRUE)
+edmonson <- cameradata[grepl("Edmonson",cameradata$street),]
+```
+
+
+# stringr
+```{r}
+library(stringr)
+nchar(under)
+substr(under,1,7)
+under2 <- "another_underscore_strings!"
+paste0(under, under2)
+under
+gsub("_"," ",under)
+gsub("_"," ",under2)
+paste(under, under2,sep="_")
+str_trim("Hey          ")
+```
+
+
+
+```{r}
+d1 <- date()
+d2 <- Sys.Date()
+d1 ; d2
+class(d1)
+class(d2)
+format(d2, "%a %A %b %m %B %d %y %Y")
+x <- c("1jan1960","2jan1960")
+z <- as.Date(x,"%d%b%Y")
+z
+weekdays(z)
+months(d2)
+```
+
+
+
+#install.packages("lubridate")
+#pack<- installed.packages()
+#table(grepl("lubridate", pack))
+```{r}
+
+library("lubridate")
+today <- dmy("24082021")
+class(today)
+ymd_hms("2021/08/24 12:02:20")
+y <- dmy(x)
+wday(y, label = T)
+```
+
+
